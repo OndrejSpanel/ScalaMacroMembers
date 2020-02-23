@@ -26,6 +26,7 @@ object Main extends App {
   val tree = Root(Seq(Leaf("1_a"), Leaf("1_b"), Root(Seq(Leaf("2_c"), Bi(Leaf("bi_d"), Leaf("bi_e"))))))
   val bi = Bi(Leaf("bi_x"), Leaf("bi_y"))
   val mixed = Mixed(Leaf("mix_a"), Seq(Leaf("mix_b1"), Leaf("mix_b2")))
+  val leaf = Leaf("")
   
   val walk = walker[Node, Root]
   val walkBi = walker[Node, Bi]
@@ -34,7 +35,7 @@ object Main extends App {
   walk(tree, x => println(x))
   walkBi(bi, x => println(x))
   walkMixed(mixed, x => println(x))
-  walkLeaf(Leaf(""), x => println(x))
+  walkLeaf(leaf, x => println(x))
 
   println("----")
   val transform = transformer[Node, Root]
@@ -47,4 +48,12 @@ object Main extends App {
   transformLeaf(Leaf(""),{x => println(x);x})
 
 
+  println("----")
+
+  val w = createAllWalkers[Node, Main.type]
+  // runtime walker invocation
+  Seq(tree, bi, mixed, leaf).foreach { node =>
+    val walker = w(node.getClass)
+    walker(node, println)
+  }
 }
