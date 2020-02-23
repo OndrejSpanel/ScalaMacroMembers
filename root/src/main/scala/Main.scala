@@ -13,4 +13,13 @@ object Main extends App {
   val sum = sumMembers[X]
   println(s"x sum: ${sum(x)}")
   println(s"y sum: ${sum(y)}")
+
+  trait Node
+
+  case class Root(children: Seq[Node]) extends Node
+  case class Leaf() extends Node
+
+  val tree = Root(Seq(Leaf(), Leaf(), Root(Seq(Leaf()))))
+  val walk = walker[Root]
+  walk(tree, x => println(x.getClass.getSimpleName))
 }
