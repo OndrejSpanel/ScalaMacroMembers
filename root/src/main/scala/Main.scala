@@ -29,7 +29,9 @@ object Main extends App {
   val walk = walker[Node, Root]
   val walkBi = walker[Node, Bi]
   val walkMixed = walker[Node, Mixed]
+  val walkLeaf = walker[Node, Leaf]
   walk(tree, x => println(x))
   walkBi(bi, x => println(x))
   walkMixed(mixed, x => println(x))
+  walkLeaf(Leaf(""), x => println(x))
 }

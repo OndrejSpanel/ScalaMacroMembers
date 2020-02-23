@@ -48,15 +48,12 @@ object Macros {
     }
     val dive = T.decls.collect {
       case f if f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.isGetter && f.asMethod.returnType <:< B =>
-        q"Seq(t.$f)"
+        q"f(t.$f)"
       case f if f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.isGetter && isSeqB(f.asMethod.returnType) =>
-        q"t.$f"
+        q"t.$f.map(f)"
     }
 
-    val r = c.Expr[(T, B => Unit) => Unit](
-      q"(t: $T, f: $B => Unit) => Seq(..$dive).flatten.map(f)"
-    )
-    println(r)
-    r
+    val r = q"(t: $T, f: $B => Unit) => {..$dive}"
+    c.Expr(r)
   }
 }
