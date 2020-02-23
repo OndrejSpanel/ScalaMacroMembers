@@ -6,7 +6,7 @@ object Macros {
   def members[T]: Seq[String] = macro members_impl[T]
   def sumMembers[T]: T => Int = macro sumMembers_impl[T]
 
-  def walker[T]: (T, (T => Unit)) => Unit = macro walker_impl[T]
+  def walker[B, T <: B]: (T, B => Unit) => Unit = macro walker_impl[B, T]
 
   private def members_list_impl[T: c.WeakTypeTag](c: blackbox.Context) = {
     import c.universe._
@@ -36,11 +36,20 @@ object Macros {
     )
   }
 
-  def walker_impl[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[(T, (T => Unit)) => Unit] = {
+  def walker_impl[B: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context): c.Expr[(T, B => Unit) => Unit] = {
     import c.universe._
     val T = weakTypeOf[T]
-    c.Expr[(T, (T => Unit)) => Unit](
-      q"(t: $T, f: $T => Unit) => f(t)"
+    val B = weakTypeOf[B]
+
+    val children = T.decls.filter { f =>
+      f.isTerm && (f.asTerm.isVal || f.asTerm.isVar) && f.asTerm.typeSignature <:< B
+    }
+    // TODO: find Seq[B] as well
+    println(children)
+
+
+    c.Expr[(T, B => Unit) => Unit](
+      q"(t: $T, f: $B => Unit) => f(t)"
     )
   }
 }
