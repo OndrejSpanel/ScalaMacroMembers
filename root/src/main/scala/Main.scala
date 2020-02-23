@@ -19,7 +19,7 @@ object Main extends App {
   case class Root(children: Seq[Node]) extends Node {
     override def toString = s"Root(${children.size})"
   }
-  case class Bi(left: Node, right: Node) extends Node
+  case class Bi(left: Node, var right: Node) extends Node
   case class Leaf(id: String) extends Node
 
   val tree = Root(Seq(Leaf("1_a"), Leaf("1_b"), Root(Seq(Leaf("2_c"), Bi(Leaf("bi_d"), Leaf("bi_e"))))))

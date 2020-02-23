@@ -42,14 +42,13 @@ object Macros {
     val B = weakTypeOf[B]
 
     val children = T.decls.filter { f =>
-      f.isTerm && (f.asTerm.isVal || f.asTerm.isVar) && f.asTerm.typeSignature <:< B
+      f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.isGetter && f.asMethod.returnType <:< B
     }
     // TODO: find Seq[B] as well
-    println(children)
-
+    val dive = children.map(c => q"t.$c")
 
     c.Expr[(T, B => Unit) => Unit](
-      q"(t: $T, f: $B => Unit) => f(t)"
+      q"(t: $T, f: $B => Unit) => Seq(..$dive).map(f)"
     )
   }
 }
