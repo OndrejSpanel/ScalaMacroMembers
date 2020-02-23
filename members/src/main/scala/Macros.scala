@@ -36,19 +36,27 @@ object Macros {
     )
   }
 
+
   def walker_impl[B: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context): c.Expr[(T, B => Unit) => Unit] = {
     import c.universe._
     val T = weakTypeOf[T]
     val B = weakTypeOf[B]
-
-    val children = T.decls.filter { f =>
-      f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.isGetter && f.asMethod.returnType <:< B
+    val iterable = typeOf[Iterable[Any]]
+    val iterableClass = iterable.typeSymbol
+    def isSeqB(returnType: Type) = {
+      returnType <:< iterable && returnType.baseType(iterableClass).typeArgs.headOption.exists(_ <:< B)
     }
-    // TODO: find Seq[B] as well
-    val dive = children.map(c => q"t.$c")
+    val dive = T.decls.collect {
+      case f if f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.isGetter && f.asMethod.returnType <:< B =>
+        q"Seq(t.$f)"
+      case f if f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.isGetter && isSeqB(f.asMethod.returnType) =>
+        q"t.$f"
+    }
 
-    c.Expr[(T, B => Unit) => Unit](
-      q"(t: $T, f: $B => Unit) => Seq(..$dive).map(f)"
+    val r = c.Expr[(T, B => Unit) => Unit](
+      q"(t: $T, f: $B => Unit) => Seq(..$dive).flatten.map(f)"
     )
+    println(r)
+    r
   }
 }
