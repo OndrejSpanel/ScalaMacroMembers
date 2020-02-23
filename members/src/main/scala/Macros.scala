@@ -9,13 +9,10 @@ object Macros {
     import c.universe._
     val tType = weakTypeOf[T]
     val list = tType.decls.filter { f =>
-      println("f " + f)
-      f.isTerm && f.name.toString.startsWith("x") && !f.name.toString.endsWith(" ")
+      f.isMethod && f.asMethod.paramLists.isEmpty && f.asMethod.returnType == typeOf[Int]
     }.map { m =>
-      println("m " + m)
       m.name.decodedName.toString
-    }.toSeq
-    println("list "+list)
+    }
     c.Expr[Seq[String]](
       q"""Seq(..$list)"""
     )
