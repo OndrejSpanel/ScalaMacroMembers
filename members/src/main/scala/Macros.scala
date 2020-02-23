@@ -16,14 +16,8 @@ object Macros {
       m.name.decodedName.toString
     }.toSeq
     println("list "+list)
-    val expr = list.map("\"" + _ + "\"").mkString("Seq(", "," , ")")
-    println(expr)
-    val enums = List(fq"x <- list")
     c.Expr[Seq[String]](
-      //Literal("a")
-      //q"$expr"
-      //q"for (..$enums) yield i"
-      q"""Seq("a")"""
+      q"""Seq(..$list)"""
     )
   }
 
